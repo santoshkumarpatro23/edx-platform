@@ -373,7 +373,10 @@ class RegistrationFormFactory(object):
         Returns:
             HttpResponse
         """
-        form_desc = FormDescription("post", reverse("user_api_registration"))
+        submit_url = reverse("user_api_registration")
+        if 'v2' in request.get_full_path():
+            submit_url = reverse("user_api_registration_v2")
+        form_desc = FormDescription("post", submit_url)
         self._apply_third_party_auth_overrides(request, form_desc)
 
         # Custom form fields can be added via the form set in settings.REGISTRATION_EXTENSION_FORM
@@ -481,6 +484,7 @@ class RegistrationFormFactory(object):
 
         form_desc.add_field(
             "confirm_email",
+            field_type="email",
             label=email_label,
             required=required,
             error_messages={
