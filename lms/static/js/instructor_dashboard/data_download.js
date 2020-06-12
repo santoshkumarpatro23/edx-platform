@@ -50,7 +50,6 @@
             this.$reports_request_response_error = $('.request-response-error');
             this.report_downloads = new (ReportDownloads())(this.$section);
             this.instructor_tasks = new (PendingInstructorTasks())(this.$section);
-            this.clear_display();
             this.$download_report = $('.download-report');
             this.$report_type_selector = $('.report-type');
             this.$selection_informations = $('.selectionInfo');
@@ -63,6 +62,7 @@
             this.$navButton = $('.data-download-nav .btn-link');
             this.$selectedSection = $('#' + this.$navButton.first().attr('data-section'));
             this.$learnerStatus = $('.learner-status');
+            this.clear_display();
             this.$navButton.click(function(event) {
                 event.preventDefault();
                 var selectedSection = '#' + $(this).attr('data-section');
@@ -117,7 +117,7 @@
                     type: 'POST',
                     url: url,
                     error: function() {
-                        // dataDownloadObj.clear_ui();
+                        dataDownloadObj.clear_display();
                         dataDownloadObj.$download_request_response_error.text(
                             gettext('Error getting issued certificates list.')
                         );
@@ -126,34 +126,7 @@
                         });
                     },
                     success: function(data) {
-                        var $tablePlaceholder, columns, feature, gridData, options;
-                        // dataDownloadObj.clear_ui();
-                        options = {
-                            enableCellNavigation: true,
-                            enableColumnReorder: false,
-                            forceFitColumns: true,
-                            rowHeight: 35
-                        };
-                        columns = (function() {
-                            var i, len, ref, results;
-                            ref = data.queried_features;
-                            results = [];
-                            for (i = 0, len = ref.length; i < len; i++) {
-                                feature = ref[i];
-                                results.push({
-                                    id: feature,
-                                    field: feature,
-                                    name: data.feature_names[feature]
-                                });
-                            }
-                            return results;
-                        }());
-                        gridData = data.certificates;
-                        $tablePlaceholder = $('<div/>', {
-                            class: 'slickgrid'
-                        });
-                        dataDownloadObj.$certificate_display_table.append($tablePlaceholder);
-                        return new window.Slick.Grid($tablePlaceholder, gridData, columns, options);
+                        dataDownloadObj.buildDataTable(data);
                     }
                 });
             };
@@ -264,34 +237,7 @@
                         });
                     },
                     success: function(data) {
-                        var $tablePlaceholder, columns, feature, gridData, options;
-                        dataDownloadObj.clear_display();
-                        options = {
-                            enableCellNavigation: true,
-                            enableColumnReorder: false,
-                            forceFitColumns: true,
-                            rowHeight: 35
-                        };
-                        columns = (function() {
-                            var i, len, ref, results;
-                            ref = data.queried_features;
-                            results = [];
-                            for (i = 0, len = ref.length; i < len; i++) {
-                                feature = ref[i];
-                                results.push({
-                                    id: feature,
-                                    field: feature,
-                                    name: data.feature_names[feature]
-                                });
-                            }
-                            return results;
-                        }());
-                        gridData = data.students;
-                        $tablePlaceholder = $('<div/>', {
-                            class: 'slickgrid'
-                        });
-                        dataDownloadObj.$download_display_table.append($tablePlaceholder);
-                        return new window.Slick.Grid($tablePlaceholder, gridData, columns, options);
+                        dataDownloadObj.buildDataTable(data);
                     }
                 });
             };
@@ -409,6 +355,36 @@
                     }
                 });
             };
+            this.buildDataTable = function(data) {
+                var $tablePlaceholder, columns, feature, gridData, options;
+                dataDownloadObj.clear_display();
+                options = {
+                    enableCellNavigation: true,
+                    enableColumnReorder: false,
+                    forceFitColumns: true,
+                    rowHeight: 35
+                };
+                columns = (function() {
+                    var i, len, ref, results;
+                    ref = data.queried_features;
+                    results = [];
+                    for (i = 0, len = ref.length; i < len; i++) {
+                        feature = ref[i];
+                        results.push({
+                            id: feature,
+                            field: feature,
+                            name: data.feature_names[feature]
+                        });
+                    }
+                    return results;
+                }());
+                gridData = data.students;
+                $tablePlaceholder = $('<div/>', {
+                    class: 'slickgrid'
+                });
+                dataDownloadObj.$download_display_table.append($tablePlaceholder);
+                return new window.Slick.Grid($tablePlaceholder, gridData, columns, options);
+            };
         }
 
         InstructorDashboardDataDownload.prototype.onClickTitle = function() {
@@ -428,6 +404,7 @@
             this.$download_request_response_error.empty();
             this.$reports_request_response.empty();
             this.$reports_request_response_error.empty();
+            this.$certificate_display_table.empty();
             $('.msg-confirm').css({
                 display: 'none'
             });
