@@ -188,8 +188,9 @@ def create_account_with_params(request, params):
     )
 
     if 'v1' in request.get_full_path():
-        del extra_fields['confirm_emil']
-        
+        if 'confirm_email' in extra_fields:
+            del extra_fields['confirm_email']
+
     form = AccountCreationForm(
         data=params,
         extra_fields=extra_fields,
