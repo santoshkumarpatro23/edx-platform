@@ -187,6 +187,9 @@ def create_account_with_params(request, params):
         registration_fields.get('honor_code') != 'hidden'
     )
 
+    if 'v1' in request.get_full_path():
+        del extra_fields['confirm_emil']
+        
     form = AccountCreationForm(
         data=params,
         extra_fields=extra_fields,
